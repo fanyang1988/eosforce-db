@@ -13,3 +13,9 @@ type Accounts struct {
 	RefBlockNum int64             `json:"ref_block_num"`
 	Data        system.NewAccount `json:"data"`
 }
+
+type AccountPermission struct {
+	Account    string `json:"account"`
+	Permission string `json:"permission"`
+	Pubkey     string `json:"pubkey"`
+}
