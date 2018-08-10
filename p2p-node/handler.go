@@ -8,13 +8,13 @@ import (
 
 // DataHandlerInterface data handler interface, when sync data will call it
 type DataHandlerInterface interface {
-	OnBlock(block *eos.SignedBlock)
-	OnTrx(trx *eos.SignedTransaction)
-	OnAction(trx *eos.SignedTransaction, act *eos.Action)
+	OnBlock(blockID string, block *eos.SignedBlock)
+	OnTrx(blockID string, blk *eos.SignedBlock, trx *eos.SignedTransaction)
+	OnAction(blockID string, trx *eos.SignedTransaction, act *eos.Action)
 
-	OnNewAccount(trx *eos.SignedTransaction, data *system.NewAccount)
-	OnTransfer(trx *eos.SignedTransaction, data *eosforce.Transfer)
+	OnNewAccount(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *system.NewAccount)
+	OnTransfer(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Transfer)
 
 	// TODO
-	OnVote(trx *eos.SignedTransaction)
+	OnVote(blockID string, trx *eos.SignedTransaction)
 }

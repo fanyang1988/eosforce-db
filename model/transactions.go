@@ -1,15 +1,19 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/fanyang1988/eos-go"
+)
 
 type Transaction struct {
-	RefBlockNum    int64     `json:"ref_block_num"`
-	RefblockPrefix int64     `json:"ref_block_prefix"`
-	BlockID        string    `json:"block_id"`
-	Expiration     int       `json:"expiration"`
-	Pending        int       `json:"pending"`
-	CreatedAt      time.Time `json:"created_at"`
-	NumActions     int64     `json:"num_actions"`
-	UpdatedAt      time.Time `json:"updated_at"`
-	Irreversible   int64     `json:"irreversible"`
+	Id             string                `json:"id"`
+	RefBlockNum    int64                 `json:"ref_block_num"`
+	RefBlockPrefix int64                 `json:"ref_block_prefix"`
+	BlockID        string                `json:"block_id"`
+	Expiration     time.Time             `json:"expiration"`
+	NumActions     int64                 `json:"num_actions"`
+	DelaySec       int64                 `json:"delay_sec"`
+	Fee            int64                 `json:"fee"`
+	Data           eos.SignedTransaction `json:"data"`
 }

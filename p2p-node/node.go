@@ -1,12 +1,13 @@
 package p2p_node
 
 import (
+	"time"
+
 	"github.com/cihub/seelog"
 	"github.com/fanyang1988/eos-go"
 	"github.com/fanyang1988/eos-go/eosforce"
 	"github.com/fanyang1988/eos-go/p2p"
 	"github.com/fanyang1988/eos-go/system"
-	"time"
 )
 
 type p2pSyncClient struct {
@@ -55,7 +56,14 @@ func (p *p2pSyncClient) StartSync(headBlock uint32, headBlockID eos.SHA256Bytes,
 					return
 				}
 
-				p.handler.OnBlock(signedBlockMsg)
+				blockID, err := signedBlockMsg.BlockID()
+				if err != nil {
+					seelog.Errorf("block id get err by %s", err.Error())
+					return
+				}
+				blockIDStr := blockID.String()
+
+				p.handler.OnBlock(blockIDStr, signedBlockMsg)
 
 				for _, tr := range signedBlockMsg.Transactions {
 					trx, err := tr.Transaction.Packed.Unpack()
@@ -64,10 +72,10 @@ func (p *p2pSyncClient) StartSync(headBlock uint32, headBlockID eos.SHA256Bytes,
 						continue
 					}
 
-					p.handler.OnTrx(trx)
+					p.handler.OnTrx(blockIDStr, signedBlockMsg, trx)
 
 					for _, action := range trx.Actions {
-						p.handler.OnAction(trx, action)
+						p.handler.OnAction(blockIDStr, trx, action)
 
 						switch action.Account {
 						case "eosio":
@@ -81,7 +89,7 @@ func (p *p2pSyncClient) StartSync(headBlock uint32, headBlockID eos.SHA256Bytes,
 											continue
 										}
 
-										p.handler.OnTransfer(trx, transferAct)
+										p.handler.OnTransfer(blockIDStr, trx, action, transferAct)
 									}
 								case "newaccount":
 									{
@@ -91,7 +99,7 @@ func (p *p2pSyncClient) StartSync(headBlock uint32, headBlockID eos.SHA256Bytes,
 											continue
 										}
 
-										p.handler.OnNewAccount(trx, newAccountAct)
+										p.handler.OnNewAccount(blockIDStr, trx, action, newAccountAct)
 									}
 								}
 							}
