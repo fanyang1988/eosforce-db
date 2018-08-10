@@ -95,8 +95,8 @@ func main() {
 	pgDB := pg.Connect(&pg.Options{
 		Addr:     "127.0.0.1:5432",
 		User:     "pgfy",
-		Password: "fy1108205411",
-		Database: "testdb",
+		Password: "123456",
+		Database: "test4",
 	})
 
 	client.RegisterHandler(p2p.HandlerFunc(func(msg p2p.Message) {

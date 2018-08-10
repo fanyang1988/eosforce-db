@@ -167,6 +167,7 @@ func NewSyncPgDB(pgAddr string, userName string, passwd string, db string) *Sync
 		Password: passwd,
 		Database: db,
 	}
+	seelog.Infof("connect db %v", res.pgOpt)
 	res.pgDB = pg.Connect(&res.pgOpt)
 	return res
 }

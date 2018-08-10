@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"time"
+
 	"github.com/cihub/seelog"
 	"github.com/fanyang1988/eosforce-db/p2p-node"
 	"github.com/fanyang1988/eosforce-db/pgsync"
 	"github.com/spf13/cobra"
-	"time"
+	"github.com/spf13/viper"
 )
 
 var watchCmd = &cobra.Command{
@@ -31,7 +33,11 @@ it may cost a large time.
 			return
 		}
 
-		client.WithHandler(pgsync.NewSyncPgDB("127.0.0.1:5432", "pgfy", "fy1108205411", "testdb"))
+		client.WithHandler(pgsync.NewSyncPgDB(
+			viper.GetString("db-address"),
+			viper.GetString("db-user"),
+			viper.GetString("db-passwd"),
+			viper.GetString("db")))
 
 		client.StartSync(0, make([]byte, 32), time.Now(), 0, make([]byte, 32))
 		err = <-client.StopChann()
