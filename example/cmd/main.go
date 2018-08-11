@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 	"fmt"
+
 	"github.com/cihub/seelog"
 	"github.com/fanyang1988/eos-go"
 	"github.com/fanyang1988/eos-go/eosforce"
@@ -186,7 +187,7 @@ func main() {
 											CreateAt:    signedBlockMsg.Timestamp.Time,
 											UpdateAt:    signedBlockMsg.Timestamp.Time,
 											Creater:     string(newAccountAct.Creator),
-											Data:        *newAccountAct,
+											Data:        *action,
 											RefBlockNum: int64(trx.RefBlockNum),
 										})
 
