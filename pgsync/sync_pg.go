@@ -1,6 +1,8 @@
 package pgsync
 
 import (
+	"time"
+
 	"github.com/cihub/seelog"
 	"github.com/fanyang1988/eos-go"
 	"github.com/fanyang1988/eos-go/eosforce"
@@ -14,8 +16,14 @@ type Sync2pgDB struct {
 	pgDB  *pg.DB
 }
 
+var lastBlockCount int64
+
 func (s *Sync2pgDB) OnBlock(blockID string, block *eos.SignedBlock) {
-	seelog.Tracef("on block %v", block.BlockNumber())
+	curr := time.Now().UnixNano()
+	seelog.Tracef("on block %v %v %v %v %v",
+		block.BlockNumber(), block.Confirmed, len(block.Transactions),
+		(curr-lastBlockCount)/1000000, block.Producer)
+	lastBlockCount = curr
 
 	b := &model.Block{
 		BlockID:               blockID,
