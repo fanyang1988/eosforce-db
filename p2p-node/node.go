@@ -45,75 +45,87 @@ func (p *p2pSyncClient) WithHandler(h DataHandlerInterface) {
 	p.handler = h
 }
 
-func (p *p2pSyncClient) StartSync(headBlock uint32, headBlockID eos.SHA256Bytes, headBlockTime time.Time, lib uint32, libID eos.SHA256Bytes) {
-	handler := p2p.HandlerFunc(func(msg p2p.Message) {
-		switch msg.Envelope.Type {
-		case eos.SignedBlockType:
-			{
-				signedBlockMsg, ok := msg.Envelope.P2PMessage.(*eos.SignedBlock)
-				if !ok {
-					seelog.Errorf("typ error by signedBlockMsg")
-					return
-				}
+func (p *p2pSyncClient) onMsg(msg p2p.Message) {
+	switch msg.Envelope.Type {
+	case eos.SignedBlockType:
+		{
+			signedBlockMsg, ok := msg.Envelope.P2PMessage.(*eos.SignedBlock)
+			if !ok {
+				seelog.Errorf("typ error by signedBlockMsg")
+				return
+			}
 
-				blockID, err := signedBlockMsg.BlockID()
+			blockID, err := signedBlockMsg.BlockID()
+			if err != nil {
+				seelog.Errorf("block id get err by %s", err.Error())
+				return
+			}
+			blockIDStr := blockID.String()
+
+			p.handler.OnBlock(blockIDStr, signedBlockMsg)
+
+			for _, tr := range signedBlockMsg.Transactions {
+				trx, err := tr.Transaction.Packed.Unpack()
 				if err != nil {
-					seelog.Errorf("block id get err by %s", err.Error())
-					return
+					seelog.Errorf("transaction unpack err by %s", err.Error())
+					continue
 				}
-				blockIDStr := blockID.String()
 
-				p.handler.OnBlock(blockIDStr, signedBlockMsg)
+				p.handler.OnTrx(blockIDStr, signedBlockMsg, trx)
 
-				for _, tr := range signedBlockMsg.Transactions {
-					trx, err := tr.Transaction.Packed.Unpack()
-					if err != nil {
-						seelog.Errorf("transaction unpack err by %s", err.Error())
-						continue
-					}
+				for _, action := range trx.Actions {
+					p.handler.OnAction(blockIDStr, trx, action)
 
-					p.handler.OnTrx(blockIDStr, signedBlockMsg, trx)
-
-					for _, action := range trx.Actions {
-						p.handler.OnAction(blockIDStr, trx, action)
-
-						switch action.Account {
-						case "eosio":
-							{
-								switch action.Name {
-								case "transfer":
-									{
-										transferAct, ok := action.ActionData.Data.(*eosforce.Transfer)
-										if !ok {
-											seelog.Errorf("transfer act data err")
-											continue
-										}
-
-										p.handler.OnTransfer(blockIDStr, trx, action, transferAct)
+					switch action.Account {
+					case "eosio":
+						{
+							switch action.Name {
+							case "transfer":
+								{
+									transferAct, ok := action.ActionData.Data.(*eosforce.Transfer)
+									if !ok {
+										seelog.Errorf("transfer act data err")
+										continue
 									}
-								case "newaccount":
-									{
-										newAccountAct, ok := action.ActionData.Data.(*system.NewAccount)
-										if !ok {
-											seelog.Errorf("newAccountAct act data err")
-											continue
-										}
 
-										p.handler.OnNewAccount(blockIDStr, trx, action, newAccountAct)
+									p.handler.OnTransfer(blockIDStr, trx, action, transferAct)
+								}
+							case "newaccount":
+								{
+									newAccountAct, ok := action.ActionData.Data.(*system.NewAccount)
+									if !ok {
+										seelog.Errorf("newAccountAct act data err")
+										continue
 									}
+
+									p.handler.OnNewAccount(blockIDStr, trx, action, newAccountAct)
 								}
 							}
 						}
 					}
 				}
-
-				return
 			}
+
+			return
 		}
+	}
 
-	})
+}
 
-	p.client.RegisterHandler(handler)
+// StartListen just listen new blocks
+func (p *p2pSyncClient) StartListen() {
+	p.client.RegisterHandler(p2p.HandlerFunc(p.onMsg))
+
+	go func() {
+		p.stopChann <- p.client.ConnectRecent()
+	}()
+
+	return
+}
+
+// StartSync from a block to listen
+func (p *p2pSyncClient) StartSync(headBlock uint32, headBlockID eos.SHA256Bytes, headBlockTime time.Time, lib uint32, libID eos.SHA256Bytes) {
+	p.client.RegisterHandler(p2p.HandlerFunc(p.onMsg))
 
 	go func() {
 		p.stopChann <- p.client.ConnectAndSync(headBlock, headBlockID, headBlockTime, lib, libID)
