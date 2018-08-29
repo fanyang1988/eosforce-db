@@ -36,7 +36,7 @@ func (s *Sync2Log) OnAction(blockID string, trx *eos.SignedTransaction, act *eos
 }
 
 func (s *Sync2Log) OnNewAccount(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *system.NewAccount) {
-	seelog.Infof("on new account %v", *data)
+	seelog.Infof("on new account %v --> %v, %v %v", data.Creator, data.Name, data.Owner, data.Active)
 }
 
 func (s *Sync2Log) OnTransfer(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Transfer) {
