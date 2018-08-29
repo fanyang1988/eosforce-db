@@ -6,6 +6,7 @@ import (
 	"github.com/cihub/seelog"
 	"github.com/fanyang1988/eos-go"
 	"github.com/fanyang1988/eos-go/eosforce"
+	"github.com/fanyang1988/eos-go/eosforce/token"
 	"github.com/fanyang1988/eos-go/system"
 )
 
@@ -42,9 +43,26 @@ func (s *Sync2Log) OnTransfer(blockID string, trx *eos.SignedTransaction, act *e
 	seelog.Infof("transfer asset %s : %s --> %s by %s", data.Quantity, data.From, data.To, data.Memo)
 }
 
-// TODO
-func (s *Sync2Log) OnVote(blockID string, trx *eos.SignedTransaction) {
-
+func (s *Sync2Log) OnTokenIssue(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *token.Issue) {
+	seelog.Infof("on token issue %v", *data)
+}
+func (s *Sync2Log) OnTokenCreate(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *token.Create) {
+	seelog.Infof("on token create %v", *data)
+}
+func (s *Sync2Log) OnTokenTransfer(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *token.Transfer) {
+	seelog.Infof("transfer token asset %s : %s --> %s by %s", data.Quantity, data.From, data.To, data.Memo)
+}
+func (s *Sync2Log) OnVote(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Vote) {
+	seelog.Infof("on vote %v asset %s --> %v", data.Voter, data.Stake, data.BpName)
+}
+func (s *Sync2Log) OnClaim(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Claim) {
+	seelog.Infof("on claim %v from %v", data.Voter, data.BpName)
+}
+func (s *Sync2Log) OnUnfreeze(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Unfreeze) {
+	seelog.Infof("on unfreeze %v from %v", data.Voter, data.BpName)
+}
+func (s *Sync2Log) OnUpdateBP(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.UpdateBP) {
+	seelog.Infof("on update bp %v %s %v %d", data.BpName, data.URL, data.BlockSigningKey, data.CommissionRate)
 }
 
 // NewSync2Log new sync to log

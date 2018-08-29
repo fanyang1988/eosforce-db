@@ -6,6 +6,7 @@ import (
 	"github.com/cihub/seelog"
 	"github.com/fanyang1988/eos-go"
 	"github.com/fanyang1988/eos-go/eosforce"
+	"github.com/fanyang1988/eos-go/eosforce/token"
 	"github.com/fanyang1988/eos-go/system"
 	"github.com/fanyang1988/eosforce-db/model"
 	"github.com/go-pg/pg"
@@ -164,7 +165,23 @@ func (s *Sync2pgDB) OnTransfer(blockID string, trx *eos.SignedTransaction, act *
 }
 
 // TODO
-func (s *Sync2pgDB) OnVote(blockID string, trx *eos.SignedTransaction) {
+func (s *Sync2pgDB) OnTokenIssue(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *token.Issue) {
+}
+func (s *Sync2pgDB) OnTokenCreate(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *token.Create) {
+}
+func (s *Sync2pgDB) OnTokenTransfer(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *token.Transfer) {
+
+}
+func (s *Sync2pgDB) OnVote(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Vote) {
+
+}
+func (s *Sync2pgDB) OnClaim(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Claim) {
+
+}
+func (s *Sync2pgDB) OnUnfreeze(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Unfreeze) {
+
+}
+func (s *Sync2pgDB) OnUpdateBP(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.UpdateBP) {
 
 }
 

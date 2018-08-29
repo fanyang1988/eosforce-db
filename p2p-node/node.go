@@ -3,6 +3,8 @@ package p2p_node
 import (
 	"time"
 
+	"github.com/fanyang1988/eos-go/eosforce/token"
+
 	"github.com/cihub/seelog"
 	"github.com/fanyang1988/eos-go"
 	"github.com/fanyang1988/eos-go/eosforce"
@@ -99,6 +101,61 @@ func (p *p2pSyncClient) onMsg(msg p2p.Message) {
 									}
 
 									p.handler.OnNewAccount(blockIDStr, trx, action, newAccountAct)
+								}
+							case "claim":
+								{
+									act, ok := action.ActionData.Data.(*eosforce.Claim)
+									if !ok {
+										seelog.Errorf("Claim act data err")
+										continue
+									}
+
+									p.handler.OnClaim(blockIDStr, trx, action, act)
+								}
+							case "vote":
+								{
+									act, ok := action.ActionData.Data.(*eosforce.Vote)
+									if !ok {
+										seelog.Errorf("Claim act data err")
+										continue
+									}
+
+									p.handler.OnVote(blockIDStr, trx, action, act)
+								}
+							}
+						}
+					case "eosio.token":
+						{
+							switch action.Name {
+							case "transfer":
+								{
+									transferAct, ok := action.ActionData.Data.(*token.Transfer)
+									if !ok {
+										seelog.Errorf("token transfer act data err")
+										continue
+									}
+
+									p.handler.OnTokenTransfer(blockIDStr, trx, action, transferAct)
+								}
+							case "issue":
+								{
+									act, ok := action.ActionData.Data.(*token.Issue)
+									if !ok {
+										seelog.Errorf("token.Issue act data err")
+										continue
+									}
+
+									p.handler.OnTokenIssue(blockIDStr, trx, action, act)
+								}
+							case "create":
+								{
+									act, ok := action.ActionData.Data.(*token.Create)
+									if !ok {
+										seelog.Errorf("token.Create act data err")
+										continue
+									}
+
+									p.handler.OnTokenCreate(blockIDStr, trx, action, act)
 								}
 							}
 						}
