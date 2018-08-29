@@ -20,8 +20,8 @@ var lastBlockCount int64
 
 func (s *Sync2pgDB) OnBlock(blockID string, block *eos.SignedBlock) {
 	curr := time.Now().UnixNano()
-	seelog.Tracef("on block %v %v %v %v %v",
-		block.BlockNumber(), block.Confirmed, len(block.Transactions),
+	seelog.Debugf("on block ...%s %d conf:%d trx:%d time:%v %v",
+		blockID[len(blockID)-6:], block.BlockNumber(), block.Confirmed, len(block.Transactions),
 		(curr-lastBlockCount)/1000000, block.Producer)
 	lastBlockCount = curr
 
@@ -52,7 +52,7 @@ func (s *Sync2pgDB) OnBlock(blockID string, block *eos.SignedBlock) {
 }
 
 func (s *Sync2pgDB) OnTrx(blockID string, blk *eos.SignedBlock, trx *eos.SignedTransaction) {
-	seelog.Tracef("on trx %v %v", trx.ID(), trx.String())
+	//seelog.Tracef("on trx %v %v", trx.ID(), trx.String())
 
 	t := &model.Transaction{
 		Id:             trx.ID(),
@@ -140,6 +140,7 @@ func (s *Sync2pgDB) OnNewAccount(blockID string, trx *eos.SignedTransaction, act
 }
 
 func (s *Sync2pgDB) OnTransfer(blockID string, trx *eos.SignedTransaction, act *eos.Action, data *eosforce.Transfer) {
+	seelog.Infof("transfer asset %s : %s --> %s by %s", data.Quantity, data.From, data.To, data.Memo)
 	a := &model.Transfer{
 		FromAccount: string(data.From),
 		ToAccount:   string(data.To),
